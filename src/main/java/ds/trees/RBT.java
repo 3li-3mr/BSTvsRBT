@@ -191,6 +191,7 @@ public class RBT implements TreeStructure {
 
     @Override
     public boolean contains(int v) {
+        logger.trace("Searching for value: {}", v);
         Node x = root;
         while(x != nil){
             if(x.value == v){
