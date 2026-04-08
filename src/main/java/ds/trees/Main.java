@@ -42,7 +42,7 @@ public class Main {
         double[] rbtDeleteTimes = new double[ITERATIONS];
         double[] rbtSortTimes = new double[ITERATIONS];
 
-        double[] mergeSortTimes = new double[ITERATIONS];
+        double[] quickSortTimes = new double[ITERATIONS];
 
         int[] searchQueries = new int[100000];
         for (int i = 0; i < 50000; i++) {
@@ -96,15 +96,15 @@ public class Main {
             start = System.nanoTime();
             for (int val : deleteQueries) rbt.delete(val);
             rbtDeleteTimes[i] = toMillis(System.nanoTime() - start);
-
-            System.out.println("  [ Tree Heights After Insertion ]");
-            System.out.println("  BST Height: " + bst.height());
-            System.out.println("  RBT Height: " + rbt.height() + "\n");
-
-            int[] mergeArray = Arrays.copyOf(data, data.length);
+            if(i == 0) {
+                System.out.println("  [ Tree Heights After Insertion ]");
+                System.out.println("  BST Height: " + bst.height());
+                System.out.println("  RBT Height: " + rbt.height() + "\n");
+            }
+            int[] array = Arrays.copyOf(data, data.length);
             start = System.nanoTime();
-            MergeSort.sort(mergeArray);
-            mergeSortTimes[i] = toMillis(System.nanoTime() - start);
+            QuickSort.sort(array);
+            quickSortTimes[i] = toMillis(System.nanoTime() - start);
         }
 
         System.out.println("  [ BST Operations ]");
@@ -120,7 +120,7 @@ public class Main {
         Stats.print("Tree Sort", rbtSortTimes);
 
         System.out.println("\n  [ Standard Sorting ]");
-        Stats.print("MergeSort", mergeSortTimes);
+        Stats.print("MergeSort", quickSortTimes);
 
         System.out.println("\n  [ RBT Speed-Up (BST Mean / RBT Mean) ]");
         System.out.printf("  Insertion Speed-Up: %6.2fx\n", Stats.getMean(bstInsertTimes) / Stats.getMean(rbtInsertTimes));
