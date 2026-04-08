@@ -6,6 +6,51 @@ import org.slf4j.LoggerFactory;
 public class RBT implements TreeStructure {
 
     private static final Logger logger = LoggerFactory.getLogger(RBT.class);
+
+    public static class Validator{
+        private static int countNodes(Node root, Node nil) {
+            if (root == nil) return 0;
+            return 1 + countNodes(root.left, nil) + countNodes(root.right, nil);
+        }
+
+        public static void check(RBT tree){
+            if(tree.root == tree.nil) return;
+            if (tree.size() != countNodes(tree.root, tree.nil)) {
+                throw new RuntimeException("Size mismatch! Expected: " + tree.size);
+            }
+            validateBST(tree.root, tree.nil, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            if(tree.root.color == RED) throw new RuntimeException("Root must be black!");
+            checkRedred(tree.root, tree.nil);
+            checkBlackHeight(tree.root, tree.nil);
+        }
+
+        private static void validateBST(Node node, Node nil, int min, int max) {
+            if (node == nil) return;
+            if (node.value <= min || node.value >= max) {
+                throw new RuntimeException("BST property violated at value: " + node.value);
+            }
+            validateBST(node.left, nil, min, node.value);
+            validateBST(node.right, nil, node.value, max);
+        }
+
+        private static void checkRedred(Node root, Node nil){
+            if(root == nil) return;
+            if(root.color == RED){
+                if(root.left.color == RED || root.right.color == RED){
+                    throw new RuntimeException("Red-Red violation at node: " + root.value);
+                }
+            }
+            checkRedred(root.left, nil);
+            checkRedred(root.right, nil);
+        }
+        private static int checkBlackHeight(Node root, Node nil){
+            if(root == nil) return 1;
+            int left = checkBlackHeight(root.left, nil);
+            int right = checkBlackHeight(root.right, nil);
+            if(left != right) throw new RuntimeException("Black Height violation at node: " + root.value);
+            return (root.color == BLACK) ? left + 1 : left;
+        }
+    }
     static final boolean VALIDATE = false;
 
     private static final boolean RED = true;
@@ -15,7 +60,7 @@ public class RBT implements TreeStructure {
     private int size;
     private final Node nil;
 
-    private static class Node {
+    static class Node {
         int value;
         boolean color;
         Node left;
@@ -76,12 +121,70 @@ public class RBT implements TreeStructure {
             }
         }
         fixInsert(x);
+
+        if (VALIDATE) Validator.check(this);
         return true;
     }
 
     @Override
     public boolean delete(int v) {
-        return false;
+        Node z = root;
+        while (z != nil) {
+            if (v == z.value) break;
+            z = (v < z.value) ? z.left : z.right;
+        }
+
+        if (z == nil) return false;
+
+        Node y = z;
+        Node x;
+        boolean yOriginalColor = y.color;
+
+        if (z.left == nil) {
+            x = z.right;
+            transplant(z, z.right);
+        } else if (z.right == nil) {
+            x = z.left;
+            transplant(z, z.left);
+        } else {
+            y = minimum(z.right);
+            yOriginalColor = y.color;
+            x = y.right;
+            if (y.parent == z) {
+                x.parent = y;
+            } else {
+                transplant(y, y.right);
+                y.right = z.right;
+                y.right.parent = y;
+            }
+            transplant(z, y);
+            y.left = z.left;
+            y.left.parent = y;
+            y.color = z.color;
+        }
+        size--;
+        if (yOriginalColor == BLACK) {
+            fixDelete(x);
+        }
+        if (VALIDATE) Validator.check(this);
+        return true;
+    }
+
+    // Helper to replace one subtree with another
+    private void transplant(Node u, Node v) {
+        if (u.parent == nil) {
+            root = v;
+        } else if (u == u.parent.left) {
+            u.parent.left = v;
+        } else {
+            u.parent.right = v;
+        }
+        v.parent = u.parent;
+    }
+
+    private Node minimum(Node node) {
+        while (node.left != nil) node = node.left;
+        return node;
     }
 
     @Override
@@ -139,6 +242,65 @@ public class RBT implements TreeStructure {
     }
 
     private void fixDelete(Node x) {
+        while (x != root && x.color == BLACK) {
+            if (x == x.parent.left) {
+                Node s = x.parent.right;
+
+                // case 1
+                if (s.color == RED) {
+                    s.color = BLACK;
+                    x.parent.color = RED;
+                    leftRotate(x.parent);
+                    s = x.parent.right;
+                }
+                // case 2
+                if (s.left.color == BLACK && s.right.color == BLACK) {
+                    s.color = RED;
+                    x = x.parent;
+                } else {
+                    // case 3
+                    if (s.right.color == BLACK) {
+                        s.left.color = BLACK;
+                        s.color = RED;
+                        rightRotate(s);
+                        s = x.parent.right;
+                    }
+
+                    // case 4
+                    s.color = x.parent.color;
+                    x.parent.color = BLACK;
+                    s.right.color = BLACK;
+                    leftRotate(x.parent);
+                    x = root;
+                }
+            } else {
+                Node s = x.parent.left;
+                if (s.color == RED) {
+                    s.color = BLACK;
+                    x.parent.color = RED;
+                    rightRotate(x.parent);
+                    s = x.parent.left;
+                }
+
+                if (s.right.color == BLACK && s.left.color == BLACK) {
+                    s.color = RED;
+                    x = x.parent;
+                } else {
+                    if (s.left.color == BLACK) {
+                        s.right.color = BLACK;
+                        s.color = RED;
+                        leftRotate(s);
+                        s = x.parent.left;
+                    }
+                    s.color = x.parent.color;
+                    x.parent.color = BLACK;
+                    s.left.color = BLACK;
+                    rightRotate(x.parent);
+                    x = root;
+                }
+            }
+        }
+        x.color = BLACK;
     }
 
     private void leftRotate(Node x) {

@@ -6,12 +6,37 @@ import org.slf4j.LoggerFactory;
 public class BST implements TreeStructure {
 
     private static final Logger logger = LoggerFactory.getLogger(BST.class);
+
+    public static class Validator {
+        private static int countNodes(Node root){
+            if(root == null){
+                return 0;
+            }
+            return 1 + countNodes(root.right) + countNodes(root.left);
+        }
+
+        public static void check(BST tree) {
+            if (tree.size() != countNodes(tree.root)) {
+                throw new RuntimeException("Size mismatch!");
+            }
+            validateBST(tree.root, Integer.MIN_VALUE, Integer.MAX_VALUE);
+        }
+
+        private static void validateBST(Node node, int min, int max) {
+            if (node == null) return;
+            if (node.value <= min || node.value >= max) {
+                throw new RuntimeException("BST property violated at value: " + node.value);
+            }
+            validateBST(node.left, min, node.value);
+            validateBST(node.right, node.value, max);
+        }
+    }
     static final boolean VALIDATE = false;
 
     private Node root;
     private int size;
 
-    private static class Node {
+    static class Node {
         int value;
         Node left;
         Node right;
@@ -58,6 +83,7 @@ public class BST implements TreeStructure {
                 y = y.right;
             }
         }
+        if (VALIDATE) Validator.check(this);
         return true;
     }
 
@@ -119,6 +145,7 @@ public class BST implements TreeStructure {
             suc_p.left = suc.right;
         }
         this.size--;
+        if (VALIDATE) Validator.check(this);
         return true;
     }
 
