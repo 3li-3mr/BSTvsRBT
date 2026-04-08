@@ -3,9 +3,6 @@ package ds.trees;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.util.ArrayList;
-import java.util.List;
-
 public class BST implements TreeStructure {
 
     private static final Logger logger = LoggerFactory.getLogger(BST.class);
@@ -48,7 +45,7 @@ public class BST implements TreeStructure {
                 if(y.left == null){
                     y.left = x;
                     this.size++;
-                    return true;
+                    break;
                 }
                 y = y.left;
             }
@@ -56,12 +53,12 @@ public class BST implements TreeStructure {
                 if(y.right == null){
                     y.right = x;
                     this.size++;
-                    return true;
+                    break;
                 }
                 y = y.right;
             }
         }
-        return false;
+        return true;
     }
 
     @Override

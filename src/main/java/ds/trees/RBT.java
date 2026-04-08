@@ -40,7 +40,43 @@ public class RBT implements TreeStructure {
 
     @Override
     public boolean insert(int v) {
-        return false;
+        Node x = new Node(v);
+        x.parent = nil;
+        x.left = nil;
+        x.right = nil;
+
+        Node y = root;
+        if(y == nil){
+            root = x;
+            root.color = BLACK;
+            this.size++;
+            return true;
+        }
+        while(y != nil){
+            if(v == y.value){
+                return false;
+            }
+            if(v < y.value){
+                if(y.left == nil){
+                    y.left = x;
+                    x.parent = y;
+                    this.size++;
+                    break;
+                }
+                y = y.left;
+            }
+            else{
+                if(y.right == nil){
+                    y.right = x;
+                    x.parent = y;
+                    this.size++;
+                    break;
+                }
+                y = y.right;
+            }
+        }
+        fixInsert(x);
+        return true;
     }
 
     @Override
@@ -66,15 +102,83 @@ public class RBT implements TreeStructure {
     }
 
     private void fixInsert(Node k) {
+        while(k.parent.color == RED) {
+            if (k.parent == k.parent.parent.left) {
+                if (k.parent.parent.right.color == RED) {
+                    k.parent.color = BLACK;
+                    k.parent.parent.right.color = BLACK;
+                    k.parent.parent.color = RED;
+                    k = k.parent.parent;
+                } else {
+                    if (k == k.parent.right) {
+                        k = k.parent;
+                        leftRotate(k);
+                    }
+                    k.parent.color = BLACK;
+                    k.parent.parent.color = RED;
+                    rightRotate(k.parent.parent);
+                }
+            } else {
+                if (k.parent.parent.left.color == RED) {
+                    k.parent.color = BLACK;
+                    k.parent.parent.left.color = BLACK;
+                    k.parent.parent.color = RED;
+                    k = k.parent.parent;
+                } else {
+                    if (k == k.parent.left) {
+                        k = k.parent;
+                        rightRotate(k);
+                    }
+                    k.parent.color = BLACK;
+                    k.parent.parent.color = RED;
+                    leftRotate(k.parent.parent);
+                }
+            }
+        }
+        root.color = BLACK;
     }
 
     private void fixDelete(Node x) {
     }
 
     private void leftRotate(Node x) {
+        Node y = x.right;
+        if(y == nil) return;
+        x.right = y.left;
+        if(y.left != nil) y.left.parent = x;
+
+        y.parent = x.parent;
+        if(x.parent == nil){
+            root = y;
+        }
+        else if(x == x.parent.left){
+            x.parent.left = y;
+        }
+        else{
+            x.parent.right = y;
+        }
+        y.left = x;
+        x.parent = y;
     }
 
     private void rightRotate(Node x) {
+        Node y = x.left;
+        if(y == nil) return;
+        x.left = y.right;
+        if(y.right != nil) y.right.parent = x;
+
+        y.parent = x.parent;
+        if(x.parent == nil){
+            root = y;
+        }
+        else if(x == x.parent.left){
+            x.parent.left = y;
+        }
+        else{
+            x.parent.right = y;
+        }
+        y.right = x;
+        x.parent = y;
     }
 
     private void inOrderHelper(Node root, int[] arr, int[] index){
