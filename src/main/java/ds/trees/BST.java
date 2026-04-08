@@ -55,6 +55,7 @@ public class BST implements TreeStructure {
 
     @Override
     public boolean insert(int v) {
+        logger.debug("Inserting value: {}", v);
         Node x = new Node(v);
         Node y = root;
         if(y == null){
@@ -89,6 +90,7 @@ public class BST implements TreeStructure {
 
     @Override
     public boolean delete(int v) {
+        logger.debug("Deleting value: {}", v);
         // finding x and parent
         Node x = root;
         Node p = null;

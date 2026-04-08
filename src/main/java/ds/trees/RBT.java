@@ -85,6 +85,7 @@ public class RBT implements TreeStructure {
 
     @Override
     public boolean insert(int v) {
+        logger.debug("Inserting value: {}", v);
         Node x = new Node(v);
         x.parent = nil;
         x.left = nil;
@@ -128,6 +129,7 @@ public class RBT implements TreeStructure {
 
     @Override
     public boolean delete(int v) {
+        logger.debug("Deleting value: {}", v);
         Node z = root;
         while (z != nil) {
             if (v == z.value) break;
@@ -304,6 +306,7 @@ public class RBT implements TreeStructure {
     }
 
     private void leftRotate(Node x) {
+        logger.debug("Left rotating around node: {}", x.value);
         Node y = x.right;
         if(y == nil) return;
         x.right = y.left;
@@ -324,6 +327,7 @@ public class RBT implements TreeStructure {
     }
 
     private void rightRotate(Node x) {
+        logger.debug("Right rotating around node: {}", x.value);
         Node y = x.left;
         if(y == nil) return;
         x.left = y.right;
