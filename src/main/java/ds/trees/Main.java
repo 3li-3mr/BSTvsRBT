@@ -120,7 +120,7 @@ public class Main {
         Stats.print("Tree Sort", rbtSortTimes);
 
         System.out.println("\n  [ Standard Sorting ]");
-        Stats.print("MergeSort", quickSortTimes);
+        Stats.print("QuickSort", quickSortTimes);
 
         System.out.println("\n  [ RBT Speed-Up (BST Mean / RBT Mean) ]");
         System.out.printf("  Insertion Speed-Up: %6.2fx\n", Stats.getMean(bstInsertTimes) / Stats.getMean(rbtInsertTimes));
